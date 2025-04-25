@@ -34,7 +34,7 @@ SPIClass sdspi(VSPI);
 #endif
 
 // Variables to hold parsed parameters from serial commands.
-int count_binconvert = 0;  // Declare count_binconvert globally and initialize to 0
+int count_binconvert = 0;         // Declare count_binconvert globally and initialize to 0
 bool serialDebugEnabled = false;  // Flag to enable/disable serial debug logging
 // --- WiFi Control Variable ---
 bool wifiEnabled = false;  // Flag to control if WiFi should be active
@@ -100,7 +100,10 @@ int pos = 0;
 int transmissions;
 int pushbutton1 = 0;
 int pushbutton2 = 0;
-byte jammer[11] = {0xff,0xff,};
+byte jammer[11] = {
+  0xff,
+  0xff,
+};
 
 //BTN Sending Config
 int btn_set_int;
@@ -156,7 +159,8 @@ const uint8_t sequence[messageLength] = {
   0x2B,                    // Sync byte
   0x2C, 0xCB, 0x33, 0x33, 0x2D, 0x34, 0xB5, 0x2B, 0x4D, 0x32, 0xAD, 0x2C, 0x56, 0x59, 0x96, 0x66,
   0x66, 0x5A, 0x69, 0x6A, 0x56, 0x9A, 0x65, 0x5A, 0x58, 0xAC, 0xB3, 0x2C, 0xCC, 0xCC, 0xB4, 0xD2,
-  0xD4,0xAD,0x34,0xCA,0xB4,0xA0};
+  0xD4, 0xAD, 0x34, 0xCA, 0xB4, 0xA0
+};
 
 // Jammer
 int jammer_pin;
@@ -634,7 +638,8 @@ void poweron_blink() {
 void force_reset() {
   esp_task_wdt_init(&wdt_config);
   esp_task_wdt_add(NULL);
-  while(true);
+  while (true)
+    ;
 }
 
 // --- Added WiFi Control Functions ---
@@ -814,11 +819,17 @@ void setup() {
     request->send(SD, "/HTML/uploadxmlfiles.html", "text/html");
   });
 
-  controlserver.on("/upload", HTTP_POST, [](AsyncWebServerRequest *request) {
-        request->send(200); }, handleUpload);
+  controlserver.on(
+    "/upload", HTTP_POST, [](AsyncWebServerRequest *request) {
+      request->send(200);
+    },
+    handleUpload);
 
-  controlserver.on("/uploadsd", HTTP_POST, [](AsyncWebServerRequest *request) {
-        request->send(200); }, handleUploadSD);
+  controlserver.on(
+    "/uploadsd", HTTP_POST, [](AsyncWebServerRequest *request) {
+      request->send(200);
+    },
+    handleUploadSD);
 
   controlserver.on("/jammer", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send(SD, "/HTML/jammer.html", "text/html");
@@ -910,7 +921,7 @@ void setup() {
 
       for (int i = 0; i < transmit.length(); i++) {
         if (transmit.substring(i, i + 1) == ",") {
-            data_to_send[counter] = transmit.substring(pos, i).toInt();
+          data_to_send[counter] = transmit.substring(pos, i).toInt();
           pos = i + 1;
           counter++;
         }
@@ -928,9 +939,9 @@ void setup() {
         ELECHOUSE_cc1101.SetTx();
         */
         // Convert to 0-based index
-        int module_index = tmp_module.toInt() - 1;                       
+        int module_index = tmp_module.toInt() - 1;
         // Call the shared configuration function. true for TX mode
-        configureCC1101(module_index, frequency, deviation, mod, true); 
+        configureCC1101(module_index, frequency, deviation, mod, true);
         // The pinMode, setModul, Init, setModulation, setMHZ, setDeviation, and SetTx calls are now handled inside configureCC1101.
 
         for (int r = 0; r < transmissions; r++) {
@@ -948,7 +959,6 @@ void setup() {
       Serial.println();
       request->send(200, "text/html", HTML_CSS_STYLING + "<script>alert(\"Signal has been transmitted\")</script>");
       ELECHOUSE_cc1101.setSidle();
-
     }
   });
 
@@ -1531,7 +1541,7 @@ void printHelp() {
   Serial.println("DEBUG_OFF - Disable serial debug logging");
   Serial.println("WIFI_ON - Enable and start the WiFi interface and web server");
   Serial.println("WIFI_OFF - Disable and stop the WiFi interface and web server");
-  Serial.println("TX_URH,<module>,<frequency>,<deviation>,<xmlname>,<mod>,<samplepulse>");
+  Serial.println("TX_URH,<module>,<frequency>,<deviation>,<xmlname>,<mod>,<samplepulse>,<transmissions>");
   /*
   Serial.println("TX_RAW,<module>,<frequency>,<rawdata>,<deviation>,<mod>,<transmissions>");
   Serial.println("TX_BIN,<module>,<frequency>,<binarydata>,<deviation>,<mod>,<samplepulse>,<transmissions>");  
@@ -1618,7 +1628,7 @@ void configureCC1101(int cc_module_index, float frequency, float deviation, int 
   ELECHOUSE_cc1101.setMHZ(frequency);
   ELECHOUSE_cc1101.setDeviation(deviation);
   // 0=2FSK, 1=GFSK, 2=ASK/OOK, 3=4FSK, 4=MSK
-  ELECHOUSE_cc1101.setModulation(modulation); 
+  ELECHOUSE_cc1101.setModulation(modulation);
   // Set the operating mode (TX or RX)
   if (setTxMode) {
     // Need to set the correct TX pin mode before setting to TX. Assuming Pin 2 for Module 1, Pin 25 for Module 2 TX
@@ -1720,7 +1730,7 @@ void stopJammerSerial() {
 
 // New method for sending signal using proto.xml via Serial. Similar to /settxprotocol in WEb interface
 void processTxUrhCommand(String commandString) {
-  
+
   if (serialDebugEnabled) {
     Serial.print("DEBUG: Called processTxUrhCommand with: ");
     Serial.println(commandString);
@@ -1733,15 +1743,17 @@ void processTxUrhCommand(String commandString) {
   String serial_xmlname;
   String serial_mod_str;
   String serial_samplepulse_str;
+  String serial_transmissions_str;
 
-  if (params.size() == 6) {
+  if (params.size() == 7) {
     serial_module = params[0];
     serial_frequency_str = params[1];
     serial_deviation_str = params[2];
     // full path to the proto.xml file, e.g., /URH/Start.proto.xml
-    serial_xmlname = params[3];  
+    serial_xmlname = params[3];
     serial_mod_str = params[4];
     serial_samplepulse_str = params[5];
+    serial_transmissions_str = params[6];
 
     if (serialDebugEnabled) {
       Serial.print("DEBUG: Parsed parameters: Module=");
@@ -1762,6 +1774,8 @@ void processTxUrhCommand(String commandString) {
     deviation = serial_deviation_str.toFloat();
     mod = serial_mod_str.toInt();
     samplepulse = serial_samplepulse_str.toInt();
+    //int temp_transmissions = serial_transmissions_str.toInt();
+    transmissions = ((serial_transmissions_str.toInt() > 0) ? serial_transmissions_str.toInt() : 1);
 
     for (int i = 0; i < samplesize; i++) {
       data_to_send[i] = 0;
@@ -1802,22 +1816,31 @@ void processTxUrhCommand(String commandString) {
           Serial.print(count_binconvert);
         }
         Serial.println(" timing values. Configuring CC1101 and transmitting...");
+
         int cc_module_index = serial_module.toInt() - 1;
         if (cc_module_index >= 0 && cc_module_index < 2) {
-          // New shared configuration function here to initialize CC1101
-          configureCC1101(cc_module_index, frequency, deviation, mod, true);  // true because TX_URH is for Transmit
-          delay(100);
+          // Transmit the signal "transmissions" times
+          for (int r = 0; r < transmissions; r++) {
+            if (serialDebugEnabled) {
+              Serial.println("DEBUG: Transmission loop " + String(r + 1) + " started.");
+            }
+            // New shared configuration function here to initialize CC1101
+            configureCC1101(cc_module_index, frequency, deviation, mod, true);  // true because TX_URH is for Transmit
+            delay(100);
 
-          for (int i = 0; i < count_binconvert; i += 2) {
-            if (i + 1 < count_binconvert) {
-              /* Repalced by the generatePulsePair method. Same change can be done at multiple other Web interfaces as well
+            for (int i = 0; i < count_binconvert; i += 2) {
+              if (i + 1 < count_binconvert) {
+                /* Repalced by the generatePulsePair method. Same change can be done at multiple other Web interfaces as well
               digitalWrite((cc_module_index == 0) ? 2 : 25, HIGH);
               delayMicroseconds(data_to_send[i]);
               digitalWrite((cc_module_index == 0) ? 2 : 25, LOW);
               delayMicroseconds(data_to_send[i + 1]);
               */
-              generatePulsePair(cc_module_index, data_to_send[i], data_to_send[i + 1]);
+                generatePulsePair(cc_module_index, data_to_send[i], data_to_send[i + 1]);
+              }
             }
+
+            delay(2000);
           }
           if (serialDebugEnabled) {
             Serial.println("DEBUG: Transmission loop finished.");
@@ -1849,24 +1872,24 @@ void handleSerialCommands() {
     Serial.println(command);
     if (command.equalsIgnoreCase("HELP") || command.equalsIgnoreCase("?")) {
       // Call the printHelp function
-      printHelp();                                                            
+      printHelp();
     } else if (command.equalsIgnoreCase("DEBUG_ON")) {
       serialDebugEnabled = true;
       Serial.println("Serial debug logging enabled.");
     } else if (command.equalsIgnoreCase("DEBUG_OFF")) {
       Serial.println("Serial debug logging disabled.");
       serialDebugEnabled = false;
-    } // Check if WIFI already ON 
+    }  // Check if WIFI already ON
     else if (command.equalsIgnoreCase("WIFI_ON")) {
       if (!wifiEnabled) {
         wifiEnabled = true;
         Serial.println("Attempting to start WiFi...");
         // Call the function to start WiFi
-        startWiFi();                                    
+        startWiFi();
       } else {
         Serial.println("WiFi is already on.");
       }
-    } // Check if WIFI already OFF
+    }  // Check if WIFI already OFF
     else if (command.equalsIgnoreCase("WIFI_OFF")) {
       if (wifiEnabled) {
         wifiEnabled = false;
@@ -1876,7 +1899,7 @@ void handleSerialCommands() {
       } else {
         Serial.println("WiFi is already off.");
       }
-    /*  Commenting this section as not being used. Might update in future if required.
+      /*  Commenting this section as not being used. Might update in future if required.
     } else if (command.startsWith("TX_RAW")) {
       processTxRawCommand(command.substring(7));
     } else if (command.startsWith("TX_BIN")) {
@@ -1935,8 +1958,7 @@ void loop() {
         digitalWrite(2, LOW);
         delayMicroseconds(jammer[i + 1]);
       }
-    }
-    else if (tmp_module == "2") {
+    } else if (tmp_module == "2") {
       for (int i = 0; i < 12; i += 2) {
         digitalWrite(25, HIGH);
         delayMicroseconds(jammer[i]);
