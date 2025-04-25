@@ -212,10 +212,10 @@ Demo: https://www.youtube.com/watch?v=feNokjfEGgs
 ## URH Parse example
 
 Evil Crow can be accessed via Serial to transmit URH file.
-The command to use follows the pattern: "TX_URH,module,frequency,deviation,xmlname,modulation,samplepulse"
+The command to use follows the pattern: "TX_URH,module,frequency,deviation,xmlname,modulation,samplepulse,retransmission_count"
 * Ex:
-  * TX_URH 1,304.20,2,/URH/Start3.proto.xml,2,500
-  * TX_URH 1,304.20,2,/URH/Stop3.proto.xml,2,500
+  * TX_URH 1,304.20,2,/URH/Start3.proto.xml,2,500,3
+  * TX_URH 1,304.20,2,/URH/Stop3.proto.xml,2,500,3
 
 Serial access makes Evil Crow a very good option for home automation integration where devices have remotes in sub GHz range.
 Hypothetically, a user can capture the signal using URH and SDR, save it as proto.xml.
