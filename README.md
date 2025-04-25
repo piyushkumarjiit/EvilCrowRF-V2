@@ -1,7 +1,5 @@
 # EvilCrowRF-V2
 
-![EvilCrow](https://github.com/joelsernamoreno/EvilCrowRF-V2/blob/main/images/Logo1.png)
-
 **Idea, development and implementation:** Joel Serna (@JoelSernaMoreno).
 
 **Main collaborator:** Little Satan (https://github.com/LSatan/)
@@ -10,33 +8,10 @@
 
 **PCB design:** Ignacio Díaz Álvarez (@Nacon_96), Forensic Security (@ForensicSec) and April Brother (@aprbrother).
 
-**Manufacturer and distributor:** April Brother (@aprbrother).
-
-**Distributor from United Kingdom:** KSEC Worldwide (@KSEC_KC).
-
 The developers and collaborators of this project do not earn money with this. 
 You can invite me for a coffee to further develop Low-Cost hacking devices. If you don't invite me for a coffee, nothing happens, I will continue developing devices.
 
 [![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/E1E614OA5)
-
-**Available with April Brother (shipping from China):** 
-
-* Evil Crow RF V2 Tindie: https://www.tindie.com/products/aprbrother/evil-crow-rf-v2-rf-transceiver-rf/
-* Evil Crow RF V2 Alibaba: https://www.alibaba.com/product-detail/Evil-Crow-RF2-signal-receiver-with_1600467911757.html 
-* Evil Crow RF V2 Aliexpress: https://www.aliexpress.com/item/3256807682636637.html
-
-**Available with SAPSAN Cybersec & Military (shipping from EU, Poland):**
-
-* https://sapsan-sklep.pl/en/products/evil-crow-rf-v2
-
-**Available with KSEC Worldwide (shipping from United Kingdom):**
-
-* Evil Crow RF V2: https://labs.ksec.co.uk/product/evil-crow-rf-v2/
-* Evil Crow RF V2 Lite: https://labs.ksec.co.uk/product/evil-crow-rf2-lite/
-
-**Available with Tienda Espía (shipping from Mexico):**
-
-* https://tiendaespia.com.mx/producto/evil-crow-rf-v2-radiofrequency-hacking-device/
 
 **Discord Group:** https://discord.gg/evilcrowrf
 
@@ -55,16 +30,13 @@ You can invite me for a coffee to further develop Low-Cost hacking devices. If y
 	* Tesla Charge Door Opener
 	* URH Parse example
 	* OTA Update
+ 	* <b>Serial Access</b>
 	* Wi-Fi Config
 	* Power management
 	* Other Sketches
 4. Evil Crow RF V2 Support
 
 # NOTE
-
-**Currently, the latest version cannot be compiled due to issues with third-party libraries. Rewriting the firmware will take some time.**
-
-**In the meantime, you can flash EvilCrow-RFv2.ino.esp32.bin, located in firmware/v1.3.2/EvilCrow-RFv2/. There is no difference between versions v1.3.2 and v1.3.3.**
 
 **You can also use alternative firmware options, for example:**
 
@@ -102,7 +74,7 @@ Evil Crow RF V2 allows the following attacks:
 * Signal receiver
 * Signal transmitter
 * Replay attack
-* URH parse
+* URH parse (can be used for Home Automation in Sub GHz band)
 * Mousejacking
 * ...
 
@@ -239,17 +211,35 @@ Demo: https://www.youtube.com/watch?v=feNokjfEGgs
 
 ## URH Parse example
 
+Evil Crow can be accessed via Serial to transmit URH file.
+The command to use follows the pattern: "TX_URH,module,frequency,deviation,xmlname,modulation,samplepulse"
+Ex: TX_URH 1,304.20,2,/URH/Start.proto.xml,2,500
+
+Serial access makes Evil Crow a very good option for home automation integration where devices have remotes in sub GHz range.
+Hypothetically, a user can capture the signal using URH and SDR, save it as proto.xml.
+Later the captured file can be transmitted using Evil Crow connected to a Raspberry Pi running Home Assistant to achive desired fuctionality.
+
 Demo: https://youtube.com/watch?v=TAgtaAnLL6U
 
 ## OTA Update
 
 Demo: https://www.youtube.com/watch?v=YQFNLyHu42A
 
+## Serial Access
+Evil Crow RF V2 can be accessed via Serial (Baud Rate 115200). Below given are the commands accesible via Serial:
+* HELP - Display command list
+* DEBUG_ON/DEBUG_OFF - Enable/Disable serial debug logging
+* WIFI_ON - Enable and start the WiFi interface and web server 
+* WIFI_OFF - Disable and stop the WiFi interface and web server
+* TX_URH - To transmit proto.xml file
+
 ## WiFi Config
 
 Evil Crow RF V2 is configured in AP mode with a default SSID and password. You can change the mode to STATION or AP, change SSID, change password and change Wi-Fi channel remotely from the web panel.
 
 The changes will be stored in the device, every time you restart Evil Crow RF V2 the new Wi-Fi settings will be applied. If you want to return to the default settings, you can delete the stored Wi-Fi configuration from the web panel.
+
+<b>If the WiFi is turned OFF on startup, user can send the command <i>"WIFI_ON"</i> via serial to enable it.</b>
 
 **NOTE:** When changing the Wi-Fi configuration you have to fill in all the fields correctly, if you do not do this you bricked the device.
 
