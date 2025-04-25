@@ -1531,15 +1531,17 @@ void printHelp() {
   Serial.println("DEBUG_OFF - Disable serial debug logging");
   Serial.println("WIFI_ON - Enable and start the WiFi interface and web server");
   Serial.println("WIFI_OFF - Disable and stop the WiFi interface and web server");
-  Serial.println("TX_RAW,<module>,<frequency>,<rawdata>,<deviation>,<mod>,<transmissions>");
-  Serial.println("TX_BIN,<module>,<frequency>,<binarydata>,<deviation>,<mod>,<samplepulse>,<transmissions>");
   Serial.println("TX_URH,<module>,<frequency>,<deviation>,<xmlname>,<mod>,<samplepulse>");
+  /*
+  Serial.println("TX_RAW,<module>,<frequency>,<rawdata>,<deviation>,<mod>,<transmissions>");
+  Serial.println("TX_BIN,<module>,<frequency>,<binarydata>,<deviation>,<mod>,<samplepulse>,<transmissions>");  
   Serial.println("TX_TESLA1,<frequency>");
   Serial.println("TX_TESLA2,<frequency>");
   Serial.println("RX_START,<module>,<frequency>,<setrxbw>,<mod>,<deviation>,<datarate>");
   Serial.println("RX_STOP - Stop current RF reception");
   Serial.println("JAMMER_ON,<module>,<frequency>,<powerjammer>");
   Serial.println("JAMMER_OFF - Stop current jamming");
+  */
   Serial.println("-----------------------------------");
   Serial.println("Parameters:");
   Serial.println("  <module>: 1 or 2 (for CC1101 modules)");
@@ -1640,7 +1642,7 @@ void generatePulsePair(int cc_module_index, unsigned long high_duration_us, unsi
   delayMicroseconds(high_duration_us);
   digitalWrite(tx_pin, LOW);
   delayMicroseconds(low_duration_us);
-  }
+}
 
 /*
 // Placeholder for TX_RAW command processing for Serial
