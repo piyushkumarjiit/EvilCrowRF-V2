@@ -1141,11 +1141,15 @@ void setup() {
         }
       }
 
-      Serial.println("Data to Send");
-      for (int i = 0; i < count_binconvert; i++) {
-        Serial.print(data_to_send[i]);
-        Serial.print(",");
+      Serial.println("Data to send ready.");
+      if (serialDebugEnabled) {
+        for (int i = 0; i < count_binconvert; i++) {
+          Serial.print(data_to_send[i]);
+          Serial.print(",");
+        }
+        Serial.println();
       }
+
 
       pinMode(2, OUTPUT);
       ELECHOUSE_cc1101.setModul(0);
@@ -1598,11 +1602,14 @@ void populateTimingData() {
   }
 
   Serial.println("Data to Send");
-  for (int i = 0; i < count_binconvert; i++) {
-    Serial.print(data_to_send[i]);
-    Serial.print(",");
-  }
-  Serial.println();
+  if (serialDebugEnabled) {
+        for (int i = 0; i < count_binconvert; i++) {
+          Serial.print(data_to_send[i]);
+          Serial.print(",");
+        }
+        Serial.println();
+      }
+  
 }
 
 // Helper function to configure a CC1101 module
@@ -1629,6 +1636,20 @@ void configureCC1101(int cc_module_index, float frequency, float deviation, int 
   ELECHOUSE_cc1101.setDeviation(deviation);
   // 0=2FSK, 1=GFSK, 2=ASK/OOK, 3=4FSK, 4=MSK
   ELECHOUSE_cc1101.setModulation(modulation);
+
+  // --- Add flush commands here if setting to TX ---
+  if (setTxMode) {
+    // Ensure idle before flushing/setting mode
+    ELECHOUSE_cc1101.setSidle();
+    // Flush TX FIFO
+    ELECHOUSE_cc1101.SpiStrobe(CC1101_SFTX);
+    if (serialDebugEnabled) {
+      Serial.print("DEBUG: Flushed CC1101 TX Module ");
+    }
+    // Optional: ELECHOUSE_cc1101.SpiStrobe(CC1101_SFRX); // Flush RX FIFO
+  }
+
+
   // Set the operating mode (TX or RX)
   if (setTxMode) {
     // Need to set the correct TX pin mode before setting to TX. Assuming Pin 2 for Module 1, Pin 25 for Module 2 TX
@@ -1647,8 +1668,21 @@ void configureCC1101(int cc_module_index, float frequency, float deviation, int 
 void generatePulsePair(int cc_module_index, unsigned long high_duration_us, unsigned long low_duration_us) {
   // Determine the correct TX pin based on the module index. Assuming Pin 2 for Module 1 (index 0), Pin 25 for Module 2 (index 1)
   int tx_pin = (cc_module_index == 0) ? 2 : 25;
+  // --- Minimal Debug Logging Attempt ---
+  /*if (serialDebugEnabled) {
+      Serial.print("[GP] HIGH:"); // Just print an indicator
+      Serial.print(high_duration_us);
+      Serial.print(" LOW:"); // Just print an indicator
+      Serial.println(low_duration_us);
+      Serial.flush(); // Try flushing the buffer immediately
+  }
+  */
   // Generate the pulse pair
   digitalWrite(tx_pin, HIGH);
+  // --- Add a very small delay AFTER the pin goes HIGH ---
+  /*if (high_duration_us > 0) { // Only add this if the HIGH pulse has a duration
+      delayMicroseconds(2); // <-- Add this line. Try 1 or 2 microseconds.
+  }*/
   delayMicroseconds(high_duration_us);
   digitalWrite(tx_pin, LOW);
   delayMicroseconds(low_duration_us);
@@ -1815,7 +1849,7 @@ void processTxUrhCommand(String commandString) {
           Serial.print("DEBUG: Parsed ");
           Serial.print(count_binconvert);
         }
-        Serial.println(" timing values. Configuring CC1101 and transmitting...");
+        Serial.println("Completed parsing timing values. Configuring CC1101 and transmitting...");
 
         int cc_module_index = serial_module.toInt() - 1;
         if (cc_module_index >= 0 && cc_module_index < 2) {
@@ -1824,9 +1858,10 @@ void processTxUrhCommand(String commandString) {
             if (serialDebugEnabled) {
               Serial.println("DEBUG: Transmission loop " + String(r + 1) + " started.");
             }
+            ELECHOUSE_cc1101.setSidle();
             // New shared configuration function here to initialize CC1101
             configureCC1101(cc_module_index, frequency, deviation, mod, true);  // true because TX_URH is for Transmit
-            delay(100);
+            delay(200);
 
             for (int i = 0; i < count_binconvert; i += 2) {
               if (i + 1 < count_binconvert) {
@@ -1886,6 +1921,7 @@ void handleSerialCommands() {
         Serial.println("Attempting to start WiFi...");
         // Call the function to start WiFi
         startWiFi();
+
       } else {
         Serial.println("WiFi is already on.");
       }
